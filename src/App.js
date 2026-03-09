@@ -15,7 +15,7 @@ setTask("");
 return (
 <div style={{textAlign:"center", marginTop:"50px"}}>
 
-<h2>DevOps React Task Manager</h2>
+<h2>DevOps React Task Managers</h2>
 
 <input
 type="text"
