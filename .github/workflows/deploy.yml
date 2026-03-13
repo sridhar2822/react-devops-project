@@ -10,7 +10,7 @@ env:
   AWS_REGION: ap-south-1
   ECR_REGISTRY: 787737883294.dkr.ecr.ap-south-1.amazonaws.com
   ECR_REPOSITORY: react-devops-app
-  CLUSTER_NAME: devops-cluster
+  CLUSTER_NAME: devops-github
   IMAGE_TAG: latest
 
 jobs:
