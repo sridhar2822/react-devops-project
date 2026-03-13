@@ -1,0 +1,52 @@
+name: React DevOps CI/CD
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+        aws-region: ap-south-1
+
+    - name: Login to ECR
+      run: |
+        aws ecr get-login-password --region ap-south-1 | \
+        docker login --username AWS --password-stdin \
+        787737883294.dkr.ecr.ap-south-1.amazonaws.com
+
+    - name: Build Docker Image
+      run: docker build -t react-devops-app .
+
+    - name: Tag Docker Image
+      run: |
+        docker tag react-devops-app:latest \
+        787737883294.dkr.ecr.ap-south-1.amazonaws.com/react-devops-app:latest
+
+    - name: Push Docker Image
+      run: |
+        docker push 787737883294.dkr.ecr.ap-south-1.amazonaws.com/react-devops-app:latest
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig \
+        --region ap-south-1 \
+        --name devops-cluster
+
+    - name: Deploy to EKS
+      run: |
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml
