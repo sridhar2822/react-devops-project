@@ -10,11 +10,11 @@ env:
   AWS_REGION: ap-south-1
   ECR_REGISTRY: 787737883294.dkr.ecr.ap-south-1.amazonaws.com
   ECR_REPOSITORY: react-devops-app
+  CLUSTER_NAME: devops-cluster
   IMAGE_TAG: latest
 
 jobs:
   build-and-deploy:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -30,26 +30,38 @@ jobs:
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Login to Amazon ECR
+      shell: bash
       run: |
-        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+        aws ecr get-login-password --region $AWS_REGION \
+        | docker login --username AWS --password-stdin $ECR_REGISTRY
 
     - name: Build Docker Image
+      shell: bash
       run: |
         docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
 
     - name: Tag Docker Image
+      shell: bash
       run: |
-        docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker tag $ECR_REPOSITORY:$IMAGE_TAG \
+        $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     - name: Push Image to ECR
+      shell: bash
       run: |
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     - name: Update kubeconfig
+      shell: bash
       run: |
-        aws eks update-kubeconfig --region $AWS_REGION --name devops-cluster
+        aws eks update-kubeconfig \
+        --region $AWS_REGION \
+        --name $CLUSTER_NAME
 
     - name: Deploy to EKS
+      shell: bash
       run: |
         kubectl apply -f k8s/deployment.yaml
         kubectl apply -f k8s/service.yaml
+        kubectl get pods
+        kubectl get svc
