@@ -9,7 +9,7 @@ pipeline {
 
         stage('Clone Code') {
             steps {
-                git 'https://github.com/sridhar2822/react-devops-project.git'
+                git 'https://github.com/meyananth/react-devops-project.git'
             }
         }
 
